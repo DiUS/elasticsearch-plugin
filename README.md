@@ -1,6 +1,31 @@
 SpringSense for ElasticSearch
 ===================================
 
+request to create index with 1 shard and registered SpringSense anayizer
+
+{"settings": { 
+"index.number_of_shards":"1",
+"analysis" : {
+	        "analyzer" : {
+	            "springSenseAnalyzer" : {
+	                "type" : "custom",
+	                "tokenizer" : "springSenseTokenizer"
+	            }    
+	        },        
+	        "tokenizer" : {
+	            "springSenseTokenizer" : {
+	                "type" : "org.elasticsearch.index.analysis.springsense.SpringSenseTokenizerFactory"
+	            }    
+	        }           
+	    }
+        }
+} 
+
+mapping for multi field one standard one spring sense
+
+
+
+
 License
 -------
 

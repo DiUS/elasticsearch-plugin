@@ -21,6 +21,7 @@
             <includes>
                 <include>org.apache.lucene:lucene-analyzers-common</include>
                 <include>commons-codec:commons-codec</include>
+                <include>com.springsense:java_api_bindings</include>
             </includes>
         </dependencySet>
     </dependencySets>
