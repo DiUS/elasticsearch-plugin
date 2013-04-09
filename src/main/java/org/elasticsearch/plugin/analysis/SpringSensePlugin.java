@@ -11,12 +11,12 @@ public class SpringSensePlugin extends AbstractPlugin {
 
     @Override
     public String name() {
-        return "spring-sense";
+        return "springsense";
     }
 
     @Override
     public String description() {
-        return "spring sense integration";
+        return "SpringSense Meaning Recognition";
     }
 
     public void onModule(AnalysisModule module) {

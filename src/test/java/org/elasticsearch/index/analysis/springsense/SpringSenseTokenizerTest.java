@@ -1,21 +1,18 @@
 package org.elasticsearch.index.analysis.springsense;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-
 
 import org.junit.Test;
 
 import com.springsense.disambig.DisambiguationResult;
 import com.springsense.disambig.MeaningRecognitionAPI;
-import com.springsense.disambig.DisambiguationResult.Sentence;
 
 public class SpringSenseTokenizerTest {
 	
@@ -79,13 +76,9 @@ public class SpringSenseTokenizerTest {
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("cat_n_01"));
+		assertThat(sut.peekCurrentTermAttribute(),is("cat_n_01"));
 
 		assertThat(sut.incrementToken(),is(false));
-
-
-		
-		
 	}
 	
 	@Test
@@ -157,20 +150,20 @@ public class SpringSenseTokenizerTest {
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("term_1_from_sentance_1"));
+		assertThat(sut.peekCurrentTermAttribute(),is("term_1_from_sentance_1"));
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("term_2_from_sentance_1"));		
+		assertThat(sut.peekCurrentTermAttribute(),is("term_2_from_sentance_1"));		
 		
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("term_1_from_sentance_2"));
+		assertThat(sut.peekCurrentTermAttribute(),is("term_1_from_sentance_2"));
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("term_2_from_sentance_2"));			
+		assertThat(sut.peekCurrentTermAttribute(),is("term_2_from_sentance_2"));			
 
 		assertThat(sut.incrementToken(),is(false));
 		
@@ -209,10 +202,35 @@ public class SpringSenseTokenizerTest {
 
 		assertThat(sut.incrementToken(),is(true));
 
-		assertThat(sut.getCurrentTerm(),is("cat"));
+		assertThat(sut.peekCurrentTermAttribute(),is("cat"));
 
 		assertThat(sut.incrementToken(),is(false));
 		
 	}
 
+	@Test
+	public void shouldTerminateCorrectlyIfNoSentences() throws IOException {
+		
+		Reader reader = new StringReader("expectedTerm") ;
+		
+		
+		MeaningRecognitionAPIFactory mockFactory = mock(MeaningRecognitionAPIFactory.class);
+		MeaningRecognitionAPI mockApi = mock(MeaningRecognitionAPI.class);
+		
+		final String noSentences = "[]";
+		
+		DisambiguationResult expectedResult = DisambiguationResult.fromJson(noSentences);
+		
+		when(mockFactory.getAPI()).thenReturn(mockApi);
+		when(mockApi.recognize("expectedTerm")).thenReturn(expectedResult);
+		
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255);
+		sut.setAPIFactory(mockFactory);
+		
+		assertThat(sut.incrementToken(),is(false));
+		
+		assertThat(sut.incrementToken(),is(false));
+		
+	}
+	
 }
