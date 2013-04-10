@@ -11,10 +11,22 @@ request to create index with 1 shard and registered SpringSense anayizer
 	                "type" : "custom",
 	                "tokenizer" : "springSenseTokenizer"
 	            }    
+	        },
+	        "analyzer" : {
+	            "lowecaseSpringSenseAnalyzer" : {
+	                "type" : "custom",
+	                "tokenizer" : "lowercaseSpringSenseTokenizer"
+	            }    
 	        },        
 	        "tokenizer" : {
 	            "springSenseTokenizer" : {
 	                "type" : "org.elasticsearch.index.analysis.springsense.SpringSenseTokenizerFactory"
+	            }    
+	        } ,        
+	        "tokenizer" : {
+	            "lowercaseSpringSenseTokenizer" : {
+	                "type" : "org.elasticsearch.index.analysis.springsense.SpringSenseTokenizerFactory" ,
+	                "transform_to_lowercase" : true
 	            }    
 	        }           
 	    }
@@ -22,7 +34,67 @@ request to create index with 1 shard and registered SpringSense anayizer
 } 
 
 mapping for multi field one standard one spring sense
+{
+    "tweet" : {
+        "properties": {
+            "message": {
+                "type": "multi_field",
+                "path": "just_name",
+                "fields": {
+                    "standard": {"type": "string", "index": "analyzed",  "analyzer" : "standard"},
+                    "spring-sense": {"type": "string","index": "analyzed", "analyzer" : "springSenseAnalyzer"},
+                    "spring-sense-lowercase": {"type": "string","index": "analyzed", "analyzer" : "lowecaseSpringSenseAnalyzer"}
+                }
+            }
+        }
+    }
+}
 
+ standard mapping from manifoldCf into elasticsearch
+ 
+ 
+ {
+"website":{
+"properties":{
+"file":{
+"type":"string"
+},
+"header-Cache-Control":{
+"type":"string"
+},
+"header-Connection":{
+"type":"string"
+},
+"header-Content-Type":{
+"type":"string"
+},
+"header-Expires":{
+"type":"string"
+},
+"header-Link":{
+"type":"string"
+},
+"header-Pragma":{
+"type":"string"
+},
+"header-Server":{
+"type":"string"
+},
+"header-Transfer-Encoding":{
+"type":"string"
+},
+"header-X-Pingback":{
+"type":"string"
+},
+"header-X-Powered-By":{
+"type":"string"
+},
+"type":{
+"type":"string"
+}
+}
+}
+}
 
 
 

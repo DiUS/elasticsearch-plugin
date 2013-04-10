@@ -17,8 +17,12 @@ import com.springsense.disambig.MeaningRecognitionAPI;
 public class SpringSenseTokenizer extends Tokenizer {
 	/** Default read buffer size */
 	public static final int DEFAULT_BUFFER_SIZE = 256;
+	public static final boolean DEFAULT_TRANSFORM_TO_LOWER_CASE = false;
+	
+	public int bufferSize;
+	public boolean transformToLowerCase;
+	
 
-	private boolean done = false;
 	private int finalOffset;
 	private int currentSentance = 0;
 	private int currentTerm = 0;
@@ -30,30 +34,32 @@ public class SpringSenseTokenizer extends Tokenizer {
 	public MeaningRecognitionAPIFactory apiFactory = new MeaningRecognitionAPIFactory();
 
 	public SpringSenseTokenizer(Reader input) {
-		this(input, DEFAULT_BUFFER_SIZE);
+		this(input, DEFAULT_BUFFER_SIZE,DEFAULT_TRANSFORM_TO_LOWER_CASE);
 	}
 
-	public SpringSenseTokenizer(Reader input, int bufferSize) {
+	public SpringSenseTokenizer(Reader input, int bufferSize,boolean transformToLowerCase) {
 		super(input);
-		if (bufferSize <= 0) {
-			throw new IllegalArgumentException("bufferSize must be > 0");
-		}
-		termAttribute.resizeBuffer(bufferSize);
+		init(bufferSize,transformToLowerCase);
 	}
 
-	public SpringSenseTokenizer(AttributeSource source, Reader input, int bufferSize) {
+
+
+	public SpringSenseTokenizer(AttributeSource source, Reader input, int bufferSize,boolean transformToLowerCase) {
 		super(source, input);
-		if (bufferSize <= 0) {
-			throw new IllegalArgumentException("bufferSize must be > 0");
-		}
-		termAttribute.resizeBuffer(bufferSize);
+		init(bufferSize,transformToLowerCase);
 	}
 
-	public SpringSenseTokenizer(AttributeFactory factory, Reader input, int bufferSize) {
+	public SpringSenseTokenizer(AttributeFactory factory, Reader input, int bufferSize,boolean transformToLowerCase) {
 		super(factory, input);
+		init(bufferSize,transformToLowerCase);
+	}
+	
+	private void init(int bufferSize,boolean transformToLowerCase) {
 		if (bufferSize <= 0) {
 			throw new IllegalArgumentException("bufferSize must be > 0");
 		}
+		this.bufferSize = bufferSize;
+		this.transformToLowerCase = transformToLowerCase;
 		termAttribute.resizeBuffer(bufferSize);
 	}
 
@@ -108,11 +114,11 @@ public class SpringSenseTokenizer extends Tokenizer {
 			clearAttributes();
 
 			while (true) {
-				char[] readInChars = new char[256];
-				final int length = input.read(readInChars, 0, 256);
+				char[] readInChars = new char[bufferSize];
+				final int length = input.read(readInChars, 0, bufferSize);
 				if (length == -1)
 					break;
-				if (length != 256) {
+				if (length != bufferSize) {
 					char[] destArray = new char[length];
 					System.arraycopy(readInChars, 0, destArray, 0, length);
 					readInChars = destArray;
@@ -121,7 +127,8 @@ public class SpringSenseTokenizer extends Tokenizer {
 			}
 			;
 			MeaningRecognitionAPI api = apiFactory.getAPI();
-			disambiguationResult = api.recognize(contentToParse.toString());
+			String contentToDisambiguate = transformToLowerCase ? contentToParse.toString().toLowerCase() : contentToParse.toString();
+			disambiguationResult = api.recognize(contentToDisambiguate);
 		}
 	}
 
@@ -135,21 +142,27 @@ public class SpringSenseTokenizer extends Tokenizer {
 
 	@Override
 	public final void end() {
-		// set final offset
-		currentSentance = 0;
-		currentTerm = 0;
-		contentToParse = new StringBuilder();
-		this.done = false;
-		disambiguationResult = null;
+		resetContent();
 		offsetAttribute.setOffset(finalOffset, finalOffset);
 	}
 
 	@Override
 	public void reset() throws IOException {
+		resetContent();
+	}
+
+	private void resetContent() {
 		currentSentance = 0;
 		currentTerm = 0;
 		contentToParse = new StringBuilder();
-		this.done = false;
 		disambiguationResult = null;
+	}
+
+	protected int getBufferSize() {
+		return bufferSize;
+	}
+
+	protected boolean isTransformToLowerCase() {
+		return transformToLowerCase;
 	}
 }

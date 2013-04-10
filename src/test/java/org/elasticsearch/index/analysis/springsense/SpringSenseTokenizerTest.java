@@ -71,7 +71,7 @@ public class SpringSenseTokenizerTest {
 		when(mockFactory.getAPI()).thenReturn(mockApi);
 		when(mockApi.recognize(myString.toString())).thenReturn(expectedResult);
 
-		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255);
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255,false);
 		sut.setAPIFactory(mockFactory);
 
 		assertThat(sut.incrementToken(),is(true));
@@ -80,6 +80,49 @@ public class SpringSenseTokenizerTest {
 
 		assertThat(sut.incrementToken(),is(false));
 	}
+	
+	
+	@Test
+	public void shouldLowercaseIfLowercaseSet() throws IOException {
+		
+		Reader reader = new StringReader("EXPECTEDTERM PASSED AS UPPERCASE") ;
+		
+		MeaningRecognitionAPIFactory mockFactory = mock(MeaningRecognitionAPIFactory.class);
+		MeaningRecognitionAPI mockApi = mock(MeaningRecognitionAPI.class);
+
+		
+		final String simpleSingleTermResult = "["
+				+   "{"
+				+      "\"terms\":["
+				+         "{"
+				+            "\"term\":\"cat\","
+				+            "\"meanings\":["
+				+               "{"
+				+                  "\"meaning\":\"cat_n_01\""
+				+               "}"
+				+            "]"
+				+         "}"
+				+      "],"
+				+      "\"scores\":["
+				+         "0.3340627674438098"
+				+      "]"
+				+   "}"
+				+"]";
+		DisambiguationResult expectedResult = DisambiguationResult.fromJson(simpleSingleTermResult);
+
+		
+		when(mockFactory.getAPI()).thenReturn(mockApi);
+		when(mockApi.recognize("expectedterm passed as uppercase")).thenReturn(expectedResult);
+
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255,true);
+		sut.setAPIFactory(mockFactory);
+
+		assertThat(sut.incrementToken(),is(true));
+
+		assertThat(sut.peekCurrentTermAttribute(),is("cat_n_01"));
+
+		assertThat(sut.incrementToken(),is(false));
+	}	
 	
 	@Test
 	public void shouldOutputAllTermsOfSentences() throws IOException {
@@ -145,7 +188,7 @@ public class SpringSenseTokenizerTest {
 		when(mockFactory.getAPI()).thenReturn(mockApi);
 		when(mockApi.recognize("expectedTerm")).thenReturn(expectedResult);
 
-		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255);
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255,false);
 		sut.setAPIFactory(mockFactory);
 
 		assertThat(sut.incrementToken(),is(true));
@@ -197,7 +240,7 @@ public class SpringSenseTokenizerTest {
 		when(mockFactory.getAPI()).thenReturn(mockApi);
 		when(mockApi.recognize("expectedTerm")).thenReturn(expectedResult);
 
-		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255);
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255,false);
 		sut.setAPIFactory(mockFactory);
 
 		assertThat(sut.incrementToken(),is(true));
@@ -224,7 +267,7 @@ public class SpringSenseTokenizerTest {
 		when(mockFactory.getAPI()).thenReturn(mockApi);
 		when(mockApi.recognize("expectedTerm")).thenReturn(expectedResult);
 		
-		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255);
+		SpringSenseTokenizer sut = new SpringSenseTokenizer( reader, 255,false);
 		sut.setAPIFactory(mockFactory);
 		
 		assertThat(sut.incrementToken(),is(false));
